@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List, Sequence
-from src.utils import generate_random_uniform_points_clouds
+from src.utils import generate_random_uniform_points_clouds, plot_points
 from random import sample
 import math
 
@@ -16,11 +16,12 @@ def distance(point1: Sequence[float], point2: Sequence[float]) -> float:
     """
     return math.hypot(point2[0] - point1[0], point2[1] - point1[1])
 
-
+'''
 def case_1(points, points_label, medoids, j, i, h) -> float:
     cost = 0
 
     if j not in [i, h] and points_label[j, 0] == i:
+        print("jesteś tu 1?")
         # find second best distance
         second_best_distance = None
 
@@ -42,6 +43,7 @@ def case_2(points, points_label, medoids, j, i, h) -> float:
     cost = 0
 
     if j not in [i, h] and points_label[j, 0] == i:
+        print("jesteś tu2?")
         # find second best distance
         second_best_distance = None
 
@@ -54,10 +56,10 @@ def case_2(points, points_label, medoids, j, i, h) -> float:
         distance_to_h_medoid = distance(points[j, :], points[h, :])
 
         if distance_to_h_medoid < second_best_distance:
-            print("aaa")
             cost = distance_to_h_medoid - distance(points[j, :], points[i, :])
+            print("cost", cost)
     return cost
-
+"""
 
 def case_3(points, points_label, medoids, j, i, h) -> float:
     cost = 0
@@ -66,7 +68,6 @@ def case_3(points, points_label, medoids, j, i, h) -> float:
         distance_to_current_medoid = distance(points[j, :], points[int(points_label[j, 0]), :])
 
         if distance_to_current_medoid <= distance_to_h_medoid:
-            print("aaa")
             cost = 0
     return cost
 
@@ -79,10 +80,50 @@ def case_4(points, points_label, medoids, j, i, h) -> float:
         distance_to_current_medoid = distance(points[j, :], points[int(points_label[j, 0]), :])
 
         if distance_to_current_medoid > distance_to_h_medoid:
-            print("aaa")
             cost = distance_to_h_medoid - distance_to_current_medoid
+            print("cost", cost)
 
     return cost
+'''
+
+
+def case_1_2(points, points_label, medoids, j, i, h) -> float:
+    cost = 0
+    if points_label[j, 0] == i:
+        #print("case 1_2")
+        # find second best distance
+        second_best_distance = None
+
+        for m in medoids:
+            if m != i:  # j belongs to i - we want find second best
+                dist = distance(points[m, :], points[j, :])
+                if second_best_distance is None or dist < second_best_distance:
+                    second_best_distance = dist
+
+        distance_to_h_medoid = distance(points[j, :], points[h, :])
+
+        if distance_to_h_medoid >= second_best_distance:
+            cost = second_best_distance - distance(points[j, :], points[i, :])
+        else:
+            cost = distance_to_h_medoid - distance(points[j, :], points[i, :])
+    return cost
+
+
+def case_3_4(points, points_label, medoids, j, i, h) -> float:
+    cost = 0
+    if points_label[j, 0] != i:
+        #print("case 3_4")
+        distance_to_h_medoid = distance(points[j, :], points[h, :])
+        #print("j", j, "label", int(points_label[j, 0]))
+        distance_to_current_medoid = distance(points[j, :], points[int(points_label[j, 0]), :])
+
+        #print("distance_to_h_medoid",distance_to_h_medoid, "distance_to_current_medoid", distance_to_current_medoid)
+        if distance_to_current_medoid <= distance_to_h_medoid:
+            cost = 0
+        else:
+            cost = distance_to_h_medoid - distance_to_current_medoid
+    return cost
+
 
 def pam_clustering(points: np.ndarray, k: int, m: List = None) -> List:
     points_label = np.zeros(shape=[points.shape[0], 1])
@@ -96,7 +137,7 @@ def pam_clustering(points: np.ndarray, k: int, m: List = None) -> List:
         medoids = sample(range(points_len), k)
 
     iteration = 0
-    while 1:
+    while iteration < 10:
         # produce current labels
         for idx, row in enumerate(points):
             medoids_iter = iter(medoids)
@@ -117,21 +158,40 @@ def pam_clustering(points: np.ndarray, k: int, m: List = None) -> List:
         for i in medoids:
             for h in range(points_len):
                 if h not in medoids:
+                    print(i, h)
                     costs_dict[(i, h)] = 0
-
                     for j in range(points_len):
+                        if j not in [h] + medoids:
+                            print(i, h, j)
 
-                        case_1_cost = case_1(points, points_label, medoids, i, h, j)
-                        case_2_cost = case_2(points, points_label, medoids, i, h, j)
-                        case_3_cost = case_3(points, points_label, medoids, i, h, j)
-                        case_4_cost = case_4(points, points_label, medoids, i, h, j)
-                        print(case_1_cost, case_2_cost, case_3_cost, case_4_cost)
-                        costs_dict[(i, h)] += sum([case_1_cost, case_2_cost, case_3_cost, case_4_cost])
-        print(costs_dict)
+                            costs_dict[(i, h)] += case_1_2(points, points_label, medoids, j, i, h)
+                            costs_dict[(i, h)] += case_3_4(points, points_label, medoids, j, i, h)
+
+        print(costs_dict, min(costs_dict, key=costs_dict.get))
+        min_cost = min(costs_dict, key=costs_dict.get)
+
+        if costs_dict[min_cost]<0:
+            for idx, m in enumerate(medoids):
+                if m == min_cost[0]:
+                    medoids[idx] = min_cost[1]
+        else:
+            break
         iteration = iteration + 1
-        break
-    print(points_label)
+
+    return points_label
+
 if __name__ == "__main__":
     points = generate_random_uniform_points_clouds([[0, 10], [10, 20], [10, 10]], [[5, 20], [21, 31], [20, 20]],
-                                                   [5, 5, 5], 2)
-    pam_clustering(points[:, 0:points.shape[1]-1],  2)
+                                                   [10, 10, 10], 2)
+    # points = np.array([[4, 7, 2], [6, 5, 2], [6, 7, 2], [1, 1, 1], [1,  3, 1], [3, 1, 1]])
+
+    plot_points(points)
+    points_label = pam_clustering(points[:, 0:points.shape[1]-1],  3)
+
+    #points_label = pam_clustering(points, k=2, m=[1, 2])
+    points_2 = points
+    #print(points_label)
+
+    points_2[:, -1] = points_label.T
+
+    plot_points(points_2)
