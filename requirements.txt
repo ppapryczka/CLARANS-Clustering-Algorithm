@@ -3,6 +3,8 @@ matplotlib==3.2.1
 numpy==1.18.3
 scikit-learn==0.22.2.post1
 pytest==5.4.1
+pandas==1.0.3
+pyclustering==0.9.3.1
 
 # development tools
 black==19.10b0

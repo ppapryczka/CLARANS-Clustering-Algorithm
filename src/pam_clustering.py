@@ -3,6 +3,7 @@ from typing import List, Sequence, Tuple, Union, Callable
 from src.utils import plot_points
 from random import sample
 from timeit import default_timer as timer
+from scipy.spatial.distance import euclidean
 
 DIST_FUNCTION = Callable[[Sequence, Sequence], float]
 
@@ -28,7 +29,6 @@ def pam_clustering(
     """
     # allocate column of labels for x
     x_label: np.ndarray = np.zeros(shape=[x.shape[0], 1])
-    print(x_label)
     # allocate list of medoids
     medoids: List[int]
     # get number of rows for data x

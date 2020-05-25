@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
+from sklearn.metrics import silhouette_score
 
 
 def generate_random_uniform_points_clouds(
@@ -9,7 +10,7 @@ def generate_random_uniform_points_clouds(
     points: List[int],
     dimensions: int,
 ) -> np.ndarray:
-    result_array = np.empty(shape=[0, dimensions+1])
+    result_array = np.empty(shape=[0, dimensions + 1])
 
     for cloud_idx in range(len(low_boundaries)):
         cloud = np.random.uniform(
@@ -29,7 +30,7 @@ def generate_random_normal_points_clouds(
     points: List[int],
     dimensions: int,
 ):
-    result_array = np.empty(shape=[0, dimensions+1])
+    result_array = np.empty(shape=[0, dimensions + 1])
 
     for cloud_idx in range(len(means)):
         cloud = np.random.normal(
@@ -48,7 +49,19 @@ def plot_points(points: np.ndarray) -> None:
     plt.show()
 
 
+def count_silhouette_score(x: np.ndarray, labels: np.ndarray):
+    if labels.shape == (x.shape[0], 1):
+        l = labels.T
+        l = l[0, :]
+    else:
+        l = labels
+
+    return silhouette_score(x, l)
+
+
 if __name__ == "__main__":
-    points = generate_random_uniform_points_clouds([[0, 10], [10, 20], [10, 10]], [[5, 20], [21, 31], [20, 20]], [100, 100, 100], 2)
+    points = generate_random_uniform_points_clouds(
+        [[0, 10], [10, 20], [10, 10]], [[5, 20], [21, 31], [20, 20]], [100, 100, 100], 2
+    )
 
     plot_points(points)
