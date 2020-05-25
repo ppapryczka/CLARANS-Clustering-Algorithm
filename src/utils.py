@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, silhouette_samples
 
 
 def generate_random_uniform_points_clouds(
@@ -10,6 +10,23 @@ def generate_random_uniform_points_clouds(
     points: List[int],
     dimensions: int,
 ) -> np.ndarray:
+    """
+    Generate clouds of points using uniform distribution.
+
+    Args:
+        low_boundaries: List of low boundaries. Each element of list is list of ints,
+        each represent low boundary for dimension, example [[0, 10]] - one points cloud,
+        `x` low boundary is 0, `y` low boundary is 10.
+        high_boundaries: List of high boundaries. Each element of list is list of ints,
+        each represent high boundary for dimension, example [[10, 20]] - one points cloud,
+        `x` high boundary is 10, `y` high boundary is 20.
+        points: Number of points for each cloud.
+        dimensions: Points dimensions.
+
+    Returns:
+        Numpy array with points clouds, last column represent label - original cloud ID.
+    """
+
     result_array = np.empty(shape=[0, dimensions + 1])
 
     for cloud_idx in range(len(low_boundaries)):
@@ -30,6 +47,24 @@ def generate_random_normal_points_clouds(
     points: List[int],
     dimensions: int,
 ):
+    """
+    Generate clouds of points using normal distribution.
+
+    Args:
+        means: List of means for each cloud. Each element represent means for one cloud,
+        each element of such list represent mean of normal distribution
+        for dimension, example [[0, 10]] - one points cloud,
+        `x` mean is 0, `y` mean is 10.
+        widths: List of widths for each cloud. Each element represent widths for one cloud,
+        each element of such list represent width of normal distribution
+        for dimension, example [[10, 20]] - one points cloud,
+        `x` width is 10, `y` width is 20.
+        points: Number of points for each cloud.
+        dimensions: Points dimensions.
+
+    Returns:
+        Numpy array with points clouds, last column represent label - original cloud ID.
+    """
     result_array = np.empty(shape=[0, dimensions + 1])
 
     for cloud_idx in range(len(means)):
@@ -42,14 +77,35 @@ def generate_random_normal_points_clouds(
     return result_array
 
 
-def plot_points(points: np.ndarray) -> None:
+def plot_points(x: np.ndarray, first_idx: int = 0, second_idx: int = 1) -> None:
+    """
+    Plot ``x``, last column represent ID.
+
+    Returns:
+        x: Numpy data matrix.
+        first_idx: Index of column to plot as x axis.
+        second_idx: Index of column to plot as y axis.
+    """
+
     fig, ax = plt.subplots()
-    for cloud in np.unique(points[:, -1]):
-        ax.scatter(points[points[:, -1] == cloud, 0], points[points[:, -1] == cloud, 1])
+    for cloud in np.unique(x[:, -1]):
+        ax.scatter(x[x[:, -1] == cloud, first_idx], x[x[:, -1] == cloud, second_idx])
     plt.show()
 
 
-def count_silhouette_score(x: np.ndarray, labels: np.ndarray):
+def count_silhouette_score(x: np.ndarray, labels: np.ndarray) -> float:
+    """
+    Rotate ``labels`` to [1, rows], if given shape is [rows, 1]
+    and calculate silhouette score.
+
+    Args:
+        x: Numpy data matrix.
+        labels: Labels for probes in ``x``.
+
+    Returns:
+        Silhouette score for data.
+    """
+
     if labels.shape == (x.shape[0], 1):
         l = labels.T
         l = l[0, :]
@@ -59,9 +115,23 @@ def count_silhouette_score(x: np.ndarray, labels: np.ndarray):
     return silhouette_score(x, l)
 
 
-if __name__ == "__main__":
-    points = generate_random_uniform_points_clouds(
-        [[0, 10], [10, 20], [10, 10]], [[5, 20], [21, 31], [20, 20]], [100, 100, 100], 2
-    )
+def count_silhouette_score_for_samples(x: np.ndarray, labels: np.ndarray):
+    """
+    Rotate ``labels`` to [1, rows], if given shape is [rows, 1]
+    and calculate silhouette score.
 
-    plot_points(points)
+    Args:
+        x: Numpy data matrix.
+        labels: Labels for probes in ``x``.
+
+    Returns:
+        Silhouette score for all samples.
+    """
+
+    if labels.shape == (x.shape[0], 1):
+        l = labels.T
+        l = l[0, :]
+    else:
+        l = labels
+
+    return silhouette_samples(x, l)
