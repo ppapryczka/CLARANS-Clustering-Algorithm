@@ -5,3 +5,8 @@ __pycache__/
 # env
 venv/
 .venv/
+
+# project 
+html/
+.coverage
+.idea/

@@ -1,11 +1,7 @@
 import numpy as np
-from typing import List, Sequence, Tuple, Union, Callable
-from src.utils import plot_points
+from typing import List, Tuple, Union
 from random import sample
-from timeit import default_timer as timer
-from scipy.spatial.distance import euclidean
-
-DIST_FUNCTION = Callable[[Sequence, Sequence], float]
+from src.utils import DIST_FUNCTION
 
 
 def pam_clustering(
@@ -15,7 +11,7 @@ def pam_clustering(
     dist_function: DIST_FUNCTION = lambda a, b: np.linalg.norm(a - b),
 ) -> Tuple[np.ndarray, List[int]]:
     """
-    Use PAM algorithm to cluster ``points``. Start algorithm with
+    Use PAM algorithm to cluster ``x``. Start algorithm with
     ``m`` medoids if given, else generate random.
 
     Args:

@@ -8,9 +8,7 @@ from src.utils import (
 )
 import pandas as pd
 from src.pam_clustering import pam_clustering
-import copy
 from scipy.spatial.distance import euclidean
-import re
 from typing import Tuple
 
 R_SCRIPT_PROGRAM: str = "Rscript"
@@ -62,21 +60,27 @@ def load_r_script_result() -> Tuple[np.ndarray, np.ndarray]:
 
 if __name__ == "__main__":
 
-    while 1:
-        points = generate_random_uniform_points_clouds(
-            [[0, 0], [20, 20]], [[10, 10], [30, 30]], [10, 10], 2
-        )
+    for _ in range(100):
+        try:
+            points = generate_random_uniform_points_clouds(
+                [[0, 0], [20, 20]], [[10, 10], [30, 30]], [10, 10], 2
+            )
 
-        run_r_pam_script(points[:, 0 : points.shape[1] - 1], 2)
+            run_r_pam_script(points[:, 0 : points.shape[1] - 1], 2)
 
-        labels_R, medoids_R = load_r_script_result()
-        labels_R = label_r_clustering(labels_R, medoids_R)
-        labels_PY, medoids_PY = pam_clustering(
-            points[:, 0 : points.shape[1] - 1], 2, dist_function=euclidean
-        )
+            labels_R, medoids_R = load_r_script_result()
+            labels_R = label_r_clustering(labels_R, medoids_R)
+            labels_PY, medoids_PY = pam_clustering(
+                points[:, 0 : points.shape[1] - 1], 2, dist_function=euclidean
+            )
 
-        print(medoids_R, medoids_PY)
-        if compare_pam_results(labels_PY.T[0, :], medoids_PY, labels_R, medoids_R):
-            print("wwooo")
-        else:
-            print("nope")
+            if compare_pam_results(labels_PY.T[0, :], medoids_PY, labels_R, medoids_R):
+                pass
+                # print("Correct")
+            else:
+                print(medoids_R, medoids_PY)
+                print("*** FAILED")
+        finally:
+            os.remove(DEFAULT_CSV_DATA_NAME)
+            os.remove(DEFAULT_MEDOIDS_CSV)
+            os.remove(DEFAULT_LABELS_CSV)

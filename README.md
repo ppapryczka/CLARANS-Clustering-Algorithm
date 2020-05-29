@@ -12,5 +12,9 @@ Do stworzenia środowiska potrzebne są:
 - `pip3 install --upgrade pip` (upgrade pip'a)
 - `pip3 install -r requirements.txt` (instalacja dodatkowych bibliotek)
 
+#### Instalacja basemap
+- `sudo apt-get install libgeos-dev`
+- `sudo pip3 install -U git+https://github.com/matplotlib/basemap.git`
+
 ### Testowanie
 - wykonaj komendę `pytest` w katalogu projektu lub `make test`

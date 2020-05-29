@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
 from sklearn.metrics import silhouette_score, silhouette_samples
+from typing import Callable, Sequence
+
+DIST_FUNCTION = Callable[[Sequence, Sequence], float]
 
 
 def generate_random_uniform_points_clouds(
@@ -135,3 +138,30 @@ def count_silhouette_score_for_samples(x: np.ndarray, labels: np.ndarray):
         l = labels
 
     return silhouette_samples(x, l)
+
+
+def count_dissimilarity_for_samples(
+    x: np.ndarray,
+    labels: np.ndarray,
+    dist_function: DIST_FUNCTION = lambda a, b: np.linalg.norm(a - b),
+) -> float:
+    if x.shape[0] != labels.shape[0]:
+        raise Exception(
+            f"Data and labels have different size! Data: {x.shape}, labels: {labels.shape}"
+        )
+
+    dissimilarity = 0.0
+    for i in range(x.shape[0]):
+        sample_medoid = x[labels[i, 0], :]
+        dissimilarity += dist_function(x[i, :], sample_medoid)
+
+    return dissimilarity
+
+
+def count_average_dissimilarity_for_samples(
+    x: np.ndarray,
+    labels: np.ndarray,
+    dist_function: DIST_FUNCTION = lambda a, b: np.linalg.norm(a - b),
+) -> float:
+    dissimilarity = count_dissimilarity_for_samples(x, labels, dist_function)
+    return dissimilarity / x.shape[0]
