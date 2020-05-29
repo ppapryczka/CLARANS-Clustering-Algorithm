@@ -47,13 +47,13 @@ def clara_clustering(
     if sample_size is None:
         sample_size = DEFAULT_SAMPLE_SIZE + 2 * k
 
-    current_average_dissimilarity = count_labels_pam_clustering(
-        x, x_label, medoids, dist_function
-    )
+    current_average_dissimilarity = count_average_dissimilarity_for_samples(x, x_label)
+
+    x_label = count_labels_pam_clustering(x, x_label, medoids)
 
     for i in range(iterations):
-        random_samples_indexes = sample(range(points_len), k)
-
+        random_samples_indexes = sample(range(points_len), sample_size)
+        random_samples_indexes = sorted(random_samples_indexes)
         random_samples = x[random_samples_indexes, :]
 
         _, sample_medoids = pam_clustering(

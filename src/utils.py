@@ -80,7 +80,9 @@ def generate_random_normal_points_clouds(
     return result_array
 
 
-def plot_points(x: np.ndarray, first_idx: int = 0, second_idx: int = 1) -> None:
+def plot_points(
+    x: np.ndarray, first_idx: int = 0, second_idx: int = 1, fname: str = None
+) -> None:
     """
     Plot ``x``, last column represent ID.
 
@@ -93,7 +95,12 @@ def plot_points(x: np.ndarray, first_idx: int = 0, second_idx: int = 1) -> None:
     fig, ax = plt.subplots()
     for cloud in np.unique(x[:, -1]):
         ax.scatter(x[x[:, -1] == cloud, first_idx], x[x[:, -1] == cloud, second_idx])
-    plt.show()
+
+    if fname is None:
+        plt.show()
+    else:
+        plt.savefig(fname, dpi=300)
+    plt.clf()
 
 
 def count_silhouette_score(x: np.ndarray, labels: np.ndarray) -> float:
@@ -140,6 +147,17 @@ def count_silhouette_score_for_samples(x: np.ndarray, labels: np.ndarray):
     return silhouette_samples(x, l)
 
 
+def count_avg_silhouette_score_for_cls(
+    x: np.ndarray, labels: np.ndarray, cls: int
+) -> float:
+    samples_silhouette = count_silhouette_score_for_samples(x, labels)
+    samples_silhouette = np.array([samples_silhouette]).T
+
+    s: np.ndarray = samples_silhouette[(labels[:, 0] == cls), :]
+
+    return float(np.mean(s))
+
+
 def count_dissimilarity_for_samples(
     x: np.ndarray,
     labels: np.ndarray,
@@ -152,7 +170,7 @@ def count_dissimilarity_for_samples(
 
     dissimilarity = 0.0
     for i in range(x.shape[0]):
-        sample_medoid = x[labels[i, 0], :]
+        sample_medoid = x[int(labels[i, 0]), :]
         dissimilarity += dist_function(x[i, :], sample_medoid)
 
     return dissimilarity

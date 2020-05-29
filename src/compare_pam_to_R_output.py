@@ -19,7 +19,7 @@ DEFAULT_LABELS_CSV: str = "labels.csv"
 
 
 def compare_pam_results(labels1, medoids1, labels2, medoids2) -> bool:
-    if sorted(medoids1) != sorted(medoids2):
+    if medoids1 != medoids2:
         return False
 
     if list(labels1) != list(labels2):
@@ -73,6 +73,13 @@ if __name__ == "__main__":
             labels_PY, medoids_PY = pam_clustering(
                 points[:, 0 : points.shape[1] - 1], 2, dist_function=euclidean
             )
+
+            medoids_R = list(medoids_R)
+            medoids_PY = list(medoids_PY)
+            medoids_R = [int(i) for i in medoids_R]
+            medoids_PY = [int(i) for i in medoids_PY]
+            medoids_R.sort()
+            medoids_PY.sort()
 
             if compare_pam_results(labels_PY.T[0, :], medoids_PY, labels_R, medoids_R):
                 pass

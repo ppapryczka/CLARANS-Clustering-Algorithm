@@ -182,30 +182,3 @@ def count_cost_for_point_from_medoid_different_than_i(
         return 0
     else:
         return distance_to_h_medoid - distance_to_current_medoid
-
-
-"""
-#points = generate_random_uniform_points_clouds([[0, 10], [10, 20], [10, 10]], [[5, 20], [21, 31], [20, 20]],
-#                                               [100, 100, 100], 2)
-points = generate_random_uniform_points_clouds([[0, 10], [8, 10], [16, 10]], [[10, 20], [18, 20], [26, 20]],
-                                               [100, 100, 100], 2)
-# points = np.array([[4, 7, 2], [6, 5, 2], [6, 7, 2], [1, 1, 1], [1,  3, 1], [3, 1, 1]])
-
-plot_points(points)
-
-start = timer()
-points_label, medoids = pam_clustering(points[:, 0:points.shape[1]-1],  3)
-end = timer()
-print(end - start)
-
-
-#points_label = pam_clustering(points, k=2, m=[1, 2])
-points_2 = points
-#print(points_label)
-
-points_2[:, -1] = points_label.T
-for m in medoids:
-    points_2[m, -1] = 5
-
-plot_points(points_2)
-"""
