@@ -8,5 +8,5 @@ pyclustering==0.9.3.1
 seaborn==0.10.1
 
 # development tools
-black==19.10b0
+black==24.3.0
 pytest-cov==2.9.0
